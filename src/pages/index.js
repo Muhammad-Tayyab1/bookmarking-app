@@ -1,52 +1,79 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { useQuery, useMutation } from '@apollo/client';
 import gql from 'graphql-tag';
+import "./style.css";
+import Card from '../components/Card';
 
-
-// This query is executed at run time by Apollo.
-const BookMarkingQuery = gql`
+const GET_BOOKMARKS = gql`
 {
-  bookmarks{
-    id
-    url
-    desc
-  }
+    bookmarks {
+        id
+        url
+        title
+    }
 }
 `;
-const AddBookMarkMutation = gql `
-  mutation addBookMark($url:String!, $desc: String!){
-    addBookMark(url: $url, desc: $desc){
-      url
+
+const ADD_BOOKMARK = gql`
+    mutation addBookmar($url: String!, $title: String!){
+        addBookmark(url: $url, title: $title){
+            id
+        }
     }
-  }
 `
+
 export default function Home() {
-  const { loading, error, data } = useQuery(BookMarkingQuery);
-  const [addBookMark] = useMutation(AddBookMarkMutation)
-let textfield;
-let desc;
-const submitBookmark = () =>{
-  addBookMark({
-    variables:{
-      url:textfield.value,
-      desc: desc.value
-    },
-    refetchQueries: [{query:BookMarkingQuery}],
-  })
-  console.log("textFiels", textfield.value);
-  console.log("Description", desc.value);
-}
-  return (
-    <div>
-      
-       <p>{JSON.stringify(data)}</p>
-    <div>
-      <input type="text" placeholder="URL" ref={node => textfield=node}/>
-      <input type="text" placeholder="Description" ref={node => desc=node}/>
 
-      <button onClick={submitBookmark}>BookMark</button>
-    </div>
-    </div>
-  );
+    let titleField;
+    let urlField;
 
+    const { error, loading, data } = useQuery(GET_BOOKMARKS);
+    const [addBookmark] = useMutation(ADD_BOOKMARK);
+    const handleSubmit = () => {
+        console.log(titleField.value)
+        console.log(urlField.value)
+        addBookmark({
+            variables: {
+                url: urlField.value,
+                title: titleField.value
+            },
+            refetchQueries: [{ query: GET_BOOKMARKS }]
+        })
+    }
+
+    if (error)
+        return <h3>{error.message}</h3>
+
+    if (loading)
+        return <h3>Loading...</h3>
+
+    return <div className="container">
+        <div className="form">
+            <h2>Add New Bookmark</h2>
+            <label htmlFor="Title">
+                Enter Bookmark Title: <br />
+                <input type="text" className="input" placeholder="Title..." required ref={node => titleField = node} />
+            </label>
+
+            <br />
+            <label htmlFor="URL">
+               
+                Enter Bookmark Url: 
+                <br />
+                <input type="text" className="input" placeholder="URL..." required ref={node => urlField = node} />
+            </label>
+
+            <br />
+            <br />
+            <button className="btn" onClick={handleSubmit}>Add Bookmark</button>
+        </div>
+        <div>
+        <h2 className="book">Bookmark List</h2>
+        {/* {JSON.stringify(data.bookmarks)} */}
+
+        <div className="card-container">
+            {data.bookmarks.map((bm) => <Card url={bm.url} title={bm.title} />)}
+        </div></div>
+
+    </div>
 }

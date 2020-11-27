@@ -1,0 +1,52 @@
+.container {
+    width: 80%;
+    align-items: center;
+   
+    max-width: 1000px;
+    margin: 0 auto;
+}
+.card-container > .card{
+    display: inline-block;
+    box-shadow: 0 0 10px black;
+    display: inline-block;
+    height: 60px;
+    width: 400px;
+    padding: 20px;
+    margin: 10px;
+    position: relative;
+    text-align: center;
+    background-color: rgb(219, 212, 212);
+}
+.form{
+    margin-left: 200px;
+     justify-content: center;
+  align-items: center;
+    background-color:  paleturquoise;
+    box-sizing: border-box;
+    max-width: 600px;
+    display: flex;
+  flex-direction: column;
+  width: 45rem;
+  padding: 2rem;
+  border: 0.1rem #c0c0c0 solid;
+  border-radius: 0.5rem;
+  list-style-type: none;
+}
+.input{
+    background-color: rgb(255, 255, 255);
+    height: 20px;
+    width: 500px;
+}
+.book{
+    text-align: center;
+}
+.btn{
+    
+    max-height: 60px;
+    max-width: 100px;
+    border-radius: 0.5rem;
+    box-sizing: border-box;
+}
+.btn :hover{
+    color: chartreuse;
+}

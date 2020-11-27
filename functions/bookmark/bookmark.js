@@ -1,73 +1,69 @@
 const { ApolloServer, gql } = require('apollo-server-lambda')
-const faunadb = require('faunadb'),
+var faunadb = require('faunadb'),
   q = faunadb.query;
+
 const typeDefs = gql`
   type Query {
-   bookmarks: [Bookmark!]
-     }
+    bookmarks: [Bookmark]
+  }
   type Bookmark {
     id: ID!
+    title: String!
     url: String!
-    desc: String!
   }
   type Mutation {
-    addBookMark(url: String!, desc: String!): Bookmark
+    addBookmark(title: String!, url: String!): Bookmark
   }
 `
 
-const authors = [
-  { id: 1, url: 'https://web.facebook.com/', desc: "this is facebook url" },
-  { id: 2, url: 'https://web.facebook.com/', desc: "this is facebook url" },
-  { id: 3, url: 'https://web.facebook.com/', desc: "this is facebook url" },
-]
-
 const resolvers = {
   Query: {
-       bookmarks: async (root, args, context) => {
-         try {
-          var client = new faunadb.Client({ secret: "fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl"});
-          var result = await client.query(
-            q.Map(
-              q.Paginate(q.Match(q.Index("url"))),
-              q.Lambda(x => q.Get(x))
-            )
+    bookmarks: async (root, args, context) => {
+      try {
+        var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
+        const result = await adminClient.query(
+          q.Map(
+            q.Paginate(q.Match(q.Index("url"))),
+            q.Lambda(x => q.Get(x))
           )
-           return result.data.map(d => {
-             return{
-               id: d.ts,
-               url: d.data.url,
-               desc: d.data.desc
-             }
-           })
-         } catch (error) {
-           console.log("error", error)
-         }
-    },
-    
+        )
+        console.log(result.data)
+
+        return result.data.map(d => {
+          return {
+            id: d.ts,
+            title: d.data.title,
+            url: d.data.url
+          }
+        })
+
+      } catch (err) {
+        console.log(err);
+      }
+    }
   },
   Mutation: {
-    addBookMark: async (_, {url, desc}) => {
-      console.log('url--desc', url, 'desc', desc);
-      var client = new faunadb.Client({ secret: "fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl"});
+    addBookmark: async (_, { title, url }) => {
+      console.log(title, url)
       try {
-        var result = await client.query(
+        var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
+
+        const result = await adminClient.query(
           q.Create(
             q.Collection('links'),
-            { data: { 
-              url,
-              desc
-            } },
+            {
+              data: {
+                title,
+                url
+              }
+            },
           )
-        );
-        console.log("Document Created and Inserted in Container: " + result.ref.id);
+        )
         return result.ref.data
-      } 
-      catch (error){
-          console.log('Error: ');
-          console.log(error);
       }
-  
-
+      catch (err) {
+        console.log(err)
+      }
     }
   }
 }
@@ -77,6 +73,4 @@ const server = new ApolloServer({
   resolvers,
 })
 
-const handler = server.createHandler()
-
-module.exports = { handler }
+exports.handler = server.createHandler()
