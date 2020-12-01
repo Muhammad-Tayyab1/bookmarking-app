@@ -4,7 +4,7 @@ var faunadb = require('faunadb'),
 
 const typeDefs = gql`
   type Query {
-    bookmarks: [Bookmark]
+    bookmarks: [Bookmark!]!
   }
   type Bookmark {
     id: ID!
@@ -12,7 +12,8 @@ const typeDefs = gql`
     url: String!
   }
   type Mutation {
-    addBookmark(title: String!, url: String!): Bookmark
+    addBookmark(title: String!, url: String!): Bookmark!
+    removeBookmark(id: ID!): Bookmark
   }
 `
 
@@ -23,15 +24,14 @@ const resolvers = {
         var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
         const result = await adminClient.query(
           q.Map(
-            q.Paginate(q.Match(q.Index("url"))),
+            q.Paginate(q.Match(q.Index('url-data'))),
             q.Lambda(x => q.Get(x))
           )
         )
-        console.log(result.data)
-
+        
         return result.data.map(d => {
           return {
-            id: d.ts,
+            id: d.ref.id,
             title: d.data.title,
             url: d.data.url
           }
@@ -59,12 +59,34 @@ const resolvers = {
             },
           )
         )
-        return result.ref.data
+        return result.data.map((d) => {
+          return {
+            id: d.ref.id,
+           title: d.data.title,
+            url: d.data.url,
+          };
+        });
       }
       catch (err) {
         console.log(err)
       }
-    }
+    },
+    removeBookmark: async (_, { id }) => {
+      try {
+        var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
+
+        const result = await adminClient.query(
+          q.Delete(q.Ref(q.Collection("links"), id))
+        );
+       return {
+          id: result.ref.id,
+          title: result.data.title,
+          url: result.data.url,
+        };
+      } catch (error) {
+        console.log("Error in Deleting Data : ", error);
+      }
+    },
   }
 }
 
