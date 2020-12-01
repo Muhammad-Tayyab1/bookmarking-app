@@ -1,7 +1,7 @@
 const { ApolloServer, gql } = require('apollo-server-lambda')
 var faunadb = require('faunadb'),
   q = faunadb.query;
-
+require("dotenv").config()
 const typeDefs = gql`
   type Query {
     bookmarks: [Bookmark!]!
@@ -21,7 +21,7 @@ const resolvers = {
   Query: {
     bookmarks: async (root, args, context) => {
       try {
-        var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
+        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET  });
         const result = await adminClient.query(
           q.Map(
             q.Paginate(q.Match(q.Index('url-data'))),
@@ -46,7 +46,7 @@ const resolvers = {
     addBookmark: async (_, { title, url }) => {
       console.log(title, url)
       try {
-        var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
+        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET  });
 
         const result = await adminClient.query(
           q.Create(
@@ -73,7 +73,7 @@ const resolvers = {
     },
     removeBookmark: async (_, { id }) => {
       try {
-        var adminClient = new faunadb.Client({ secret: 'fnAD7ju3HoACBxnjt89EuTIFaRVEKh8drVcN87Sl' });
+        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET  });
 
         const result = await adminClient.query(
           q.Delete(q.Ref(q.Collection("links"), id))
