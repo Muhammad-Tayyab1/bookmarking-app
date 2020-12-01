@@ -21,7 +21,7 @@ const resolvers = {
   Query: {
     bookmarks: async (root, args, context) => {
       try {
-        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET  });
+        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET });
         const result = await adminClient.query(
           q.Map(
             q.Paginate(q.Match(q.Index('url-data'))),
@@ -46,7 +46,7 @@ const resolvers = {
     addBookmark: async (_, { title, url }) => {
       console.log(title, url)
       try {
-        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET  });
+        var adminClient = new faunadb.Client({ secret: process.env.FAUNADB_SECRET });
 
         const result = await adminClient.query(
           q.Create(
