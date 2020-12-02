@@ -4,7 +4,11 @@ import gql from 'graphql-tag';
 import "./style.css";
 import {Grid } from "@material-ui/core";
 import { Delete } from "@material-ui/icons";
-
+type dataType = {
+  id: string;
+  title: string;
+  url: string;
+};
 const GET_BOOKMARKS = gql`
 {
   bookmarks {
@@ -33,8 +37,8 @@ const REMOVE_BOOKMARK = gql`
 `;
 
 export default function Home() {
-  const [title, setTitle] = useState("");
-  const [siteUrl, setSiteURl] = useState("");
+  const [title, setTitle] = useState<string>("");
+  const [siteUrl, setSiteURl] = useState<string>("");
   const { error, loading, data } = useQuery(GET_BOOKMARKS);
   const [addBookmark] = useMutation(ADD_BOOKMARK);
   const [removeBookmark] = useMutation(REMOVE_BOOKMARK);
@@ -49,7 +53,7 @@ export default function Home() {
       refetchQueries: [{ query: GET_BOOKMARKS }]
     })
   };
-  const remove = (id) => {
+  const remove = (id:string) => {
     removeBookmark({
       variables: {
         id: id,
@@ -90,7 +94,7 @@ export default function Home() {
       <h2 className="book">Bookmark List</h2>
       <div className="data-container">
         <Grid  className="card-container">
-          {data && data.bookmarks.map((d) => 
+          {data && data.bookmarks.map((d: dataType) => 
             
               <Grid  key={d.id}>
                 <div className="dataList">
